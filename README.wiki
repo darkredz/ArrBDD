@@ -9,39 +9,38 @@ Use array & closures. Make it simple.
 ===Argh!? But just how?===
 
 Arr! BDD? Specs?:
-    /**
-     * Simplest form. Check out the test examples for more
-     */
-    $specs["The 'Hello world' string"] = array(
-        'subject' => function(){
-            return 'Hello world';
-        },
-        "SHOULD be 11 characters long" => function($hello){
-            return (strlen($hello)===11);
-        },
-        "AND start with 'Hello'" => function($hello){
-            return (strpos($hello, 'Hello')===0);
-        }
-    );
-
+ <nowiki>
+/**
+ * Simplest form. Check out the test examples for more
+ */
+$specs["The 'Hello world' string"] = array(
+    'subject' => function(){
+        return 'Hello world';
+    },
+    "SHOULD be 11 characters long" => function($hello){
+        return (strlen($hello)===11);
+    },
+    "AND start with 'Hello'" => function($hello){
+        return (strpos($hello, 'Hello')===0);
+    }
+);</nowiki>
 
 Arr! Mock:
-    $mydbMock = ArrMock::create('MyDB');
-        
-    // Follow this order method -> arguments -> returns
-    $mydbMock->method('getHost')
-             ->args('slaves')
-             ->returns(array('192.168.1.2', '192.168.1.5'));
+<nowiki>
+$mydbMock = ArrMock::create('MyDB');
+    
+// Follow this order method -> arguments -> returns
+$mydbMock->method('getHost')
+         ->args('slaves')
+         ->returns(array('192.168.1.2', '192.168.1.5'));
 
-    // Method without arguments    
-    $mydbMock->method('getHost')
-             ->returns('127.0.0.1');
+// Method without arguments    
+$mydbMock->method('getHost')
+         ->returns('127.0.0.1');
 
-    // Mock static methods
-    $mydbMock->staticMethod('getPath')
-             ->returns('/var/db/');
-        
-
+// Mock static methods
+$mydbMock->staticMethod('getPath')
+         ->returns('/var/db/');</nowiki>
 
 Run the test and get some JSON results:
 [https://chrome.google.com/webstore/detail/mfjgkleajnieiaonjglfmanlmibchpam JSONView for Chrome]
