@@ -1,5 +1,4 @@
-Argh!? BDD! ARGH!! Mocks?!
-
+Argh!? BDD!   ARGH!! Mocks?!
 =No. It's ArrBDD=
 ===A simple BDD library for PHP 5===
 Use array & closures. Make it simple.
