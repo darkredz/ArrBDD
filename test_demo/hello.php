@@ -1,0 +1,1 @@
+<?php//Simplest test$specs["The 'Hello world' string"] = array(    'subject' => function(){        return 'Hello worlds';    },    "SHOULD be 12 characters long" => function($hello){        return (strlen($hello)===12);    },    "AND start with 'Hello'" => function($hello){        return (strpos($hello, 'Hello')===0);    });
