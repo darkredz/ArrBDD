@@ -189,6 +189,7 @@ function evalAsserts(&$results, &$rs, &$assertError, $stepName, $_stepName = NUL
     }    
     
     if( empty($afMsg) ){
+        if($assertError===null) $assertError = false;
         $rst = ($rs) ? $rs : $assertError;                
     }
     else if(!empty($rs)){
@@ -207,6 +208,7 @@ function evalAsserts(&$results, &$rs, &$assertError, $stepName, $_stepName = NUL
         else
             $rst = $assertError;
     }    
+    $assertError = null;
 }
 
 
