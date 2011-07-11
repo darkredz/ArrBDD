@@ -9,7 +9,7 @@ Use array & closures. Make it simple.
 ===Argh!? But just how?===
 
 Arr! BDD? Specs?:
-{{{
+<code>
 /**
  * Simplest form. Check out the test examples for more
  */
@@ -24,11 +24,11 @@ $specs["The 'Hello world' string"] = array(
         return (strpos($hello, 'Hello')===0);
     }
 );
-}}}
+</code>
 
 
 Arr! Mock:
-{{{
+<code>
 $mydbMock = ArrMock::create('MyDB');
     
 // Follow this order method -> arguments -> returns
@@ -44,11 +44,11 @@ $mydbMock->method('getHost')
 $mydbMock->staticMethod('getPath')
          ->returns('/var/db/');
     
-}}}
+</code>
 
 
 Run the test and get some JSON results:
 [https://chrome.google.com/webstore/detail/mfjgkleajnieiaonjglfmanlmibchpam JSONView for Chrome]
 [https://chrome.google.com/webstore/detail/mfjgkleajnieiaonjglfmanlmibchpam JSONView for Firefox]
 
-[https://lh5.googleusercontent.com/-TCdWD0mgw0Q/ThrYmAq69RI/AAAAAAAAAKM/NjnNmBvmnzs/json.jpg]
+[File:https://lh5.googleusercontent.com/-TCdWD0mgw0Q/ThrYmAq69RI/AAAAAAAAAKM/NjnNmBvmnzs/json.jpg|BDD results]
