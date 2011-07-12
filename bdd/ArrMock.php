@@ -67,6 +67,17 @@ class $className extends ArrMock{
         return \$this;
     }
 
+    public function totalCalls( \$method ){
+        // get total method calls on both static and non-static coz they can't have the same name
+        \$args = array_slice(func_get_args(), 1); 
+        \$total = parent::calcTotalCalls(\$this->methods, \$method, \$args);
+        
+        if( \$total===null && !empty(self::\$staticMethods[\$method]) ){        
+            \$total = parent::calcTotalCalls(self::\$staticMethods, \$method, \$args);
+        }        
+        return (int)\$total;
+    }
+    
     public static function __callStatic(\$name, \$args) {
         if( isset( self::\$staticMethods[\$name] ) ){
             \$args = var_export(\$args, true);
@@ -192,6 +203,37 @@ EOF
         }
         
         throw new Exception("Call to undefined method ". $this->selfClassName ."::$name()");
+    }
+    
+    protected function calcTotalCalls( $methodsList, $method, $args ){
+        // get total method calls on both static and non-static coz they can't have the same name
+        if( !empty($methodsList[$method]) ){
+            $methodsCalled = $methodsList[$method];
+            $total = 0;
+            
+            $emptyArgs = (sizeof($args)===0);
+            //null should be converted to an empty array to be var_export as key
+            if( sizeof($args)===1 && $args[0]===null ) 
+                $args = array();
+            
+            if(!$emptyArgs)
+                $args = var_export($args, true);
+                        
+            // add up all methods call count
+            foreach($methodsCalled as $argsKey => $mc){
+                if(isset($mc['count'])){
+                    // all methods, ignore matching args
+                    if( $emptyArgs ){
+                        $total += $mc['count'];
+                    }
+                    // try matching the arguments as key
+                    else if( $argsKey===$args ){
+                        $total += $mc['count']; 
+                    }
+                }
+            }
+            return $total;
+        }
     }
 }
 
