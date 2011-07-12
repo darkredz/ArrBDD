@@ -22,7 +22,6 @@ class ArrMock {
     protected $lastStaticMethod;
     protected $lastArgs;
     
-
     /**
      * Prevent direct object creation of ArrMock
      */
@@ -63,10 +62,23 @@ class $className extends ArrMock{
         
         \$ret = &self::\$staticMethods[\$this->lastStaticMethod][\$this->lastArgs]['returns'];
         self::getReturnVal(\$ret, \$returnVal, \$position);
-        
+
         return \$this;
     }
+    
+    public function handle(\$func){            
+        \$return = parent::handle( \$func );
+        
+        //if the return is \$this, meaning it's a non static method, return \$this straight away
+        if( isset(\$this->lastMethod) && is_object(\$return) && is_subclass_of(\$return, 'ArrMock') ){
+            return \$this;        
+        }
 
+        self::\$staticMethods[\$this->lastStaticMethod]['handler'] = \$func;
+
+        return \$this;    
+    }
+    
     public function totalCalls( \$method ){
         // get total method calls on both static and non-static coz they can't have the same name
         \$args = array_slice(func_get_args(), 1); 
@@ -78,9 +90,9 @@ class $className extends ArrMock{
         return (int)\$total;
     }
     
-    public static function __callStatic(\$name, \$args) {
+    public static function __callStatic(\$name, \$arguments) {
         if( isset( self::\$staticMethods[\$name] ) ){
-            \$args = var_export(\$args, true);
+            \$args = var_export(\$arguments, true);
             if( isset( self::\$staticMethods[\$name][\$args] ) ){
                 \$ret = &self::\$staticMethods[\$name][\$args];
                 if( !isset(\$ret['count']) )
@@ -94,6 +106,15 @@ class $className extends ArrMock{
                     
                 return \$ret['returns'][ \$count ];
             }                
+            else if( !empty(self::\$staticMethods[\$name]['handler']) ){
+            
+                if( !isset(self::\$staticMethods[\$name]['handlerCallCount']) )
+                    self::\$staticMethods[\$name]['handlerCallCount'] = 0;
+                self::\$staticMethods[\$name]['handlerCallCount']++;
+                
+                \$handler = self::\$staticMethods[\$name]['handler'];
+                return \$handler(\$arguments);
+            }
         }
         throw new Exception("Call to undefined static method ". __CLASS__ ."::\$name()");
     }
@@ -127,6 +148,16 @@ EOF
             $this->lastArgs = var_export($args, true);
         }
         return $this;
+    }
+    
+    public function handle($func){            
+        if(isset($this->lastMethod)){            
+            $this->methods[$this->lastMethod]['handler'] = $func;
+        }
+        else if(isset($this->lastStaticMethod)){  
+            return $func;
+        }
+        return $this;    
     }
     
     public function returns( $returnVal = null, $position = null, $execFunc = null){
@@ -183,9 +214,9 @@ EOF
             return $this->toStringVal;
     }
 
-    public function __call($name, $args) {
+    public function __call($name, $arguments) {
         if( isset( $this->methods[$name] ) ){
-            $args = var_export($args, true);
+            $args = var_export($arguments, true);
             if( isset( $this->methods[$name][$args] ) ){
                 $ret = &$this->methods[$name][$args];
                 
@@ -199,6 +230,12 @@ EOF
                     $count = $retLength - 1;
                     
                 return $ret['returns'][ $count ];
+            }
+            else if( !empty($this->methods[$name]['handler']) ){
+                if( !isset($this->methods[$name]['handlerCallCount']) )
+                    $this->methods[$name]['handlerCallCount'] = 0;
+                $this->methods[$name]['handlerCallCount']++;
+                return $this->methods[$name]['handler']($arguments);
             }
         }
         
@@ -221,7 +258,13 @@ EOF
                         
             // add up all methods call count
             foreach($methodsCalled as $argsKey => $mc){
-                if(isset($mc['count'])){
+                if($argsKey==='handlerCallCount') continue;
+                
+                if($argsKey==='handler'){
+                    if($emptyArgs)
+                        $total += $methodsCalled['handlerCallCount'];
+                }
+                else if(isset($mc['count'])){
                     // all methods, ignore matching args
                     if( $emptyArgs ){
                         $total += $mc['count'];
