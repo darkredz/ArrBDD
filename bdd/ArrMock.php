@@ -48,27 +48,41 @@ class $className extends ArrMock{
     public static \$staticMethods = array();
     protected \$selfClassName = '$className';
 
-    public function returns( \$returnVal ){
-        \$return = parent::returns( \$returnVal );
+    public function returns( \$returnVal = null, \$position = null, \$execFunc = null ){
+        \$return = parent::returns( \$returnVal, \$position, \$execFunc );
         
         //if the return is \$this, meaning it's a non static method, return \$this straight away
         if( isset(\$this->lastMethod) && is_object(\$return) && is_subclass_of(\$return, 'ArrMock') ){
-            \$this->lastMethod = \$this->lastStaticMethod = \$this->lastArgs = null;        
             return \$this;        
         }
         
-        self::\$staticMethods[\$this->lastStaticMethod][\$this->lastArgs] = \$returnVal;
+        if(empty(self::\$staticMethods[\$this->lastMethod][\$this->lastArgs])){
+            self::\$staticMethods[\$this->lastMethod][\$this->lastArgs] = array();
+            self::\$staticMethods[\$this->lastMethod][\$this->lastArgs]['returns'] = array();
+        }
         
-        //reset
-        \$this->lastMethod = \$this->lastStaticMethod = \$this->lastArgs = null;            
+        \$ret = &self::\$staticMethods[\$this->lastStaticMethod][\$this->lastArgs]['returns'];
+        self::getReturnVal(\$ret, \$returnVal, \$position);
+        
         return \$this;
     }
 
     public static function __callStatic(\$name, \$args) {
         if( isset( self::\$staticMethods[\$name] ) ){
             \$args = var_export(\$args, true);
-            if( isset( self::\$staticMethods[\$name][\$args] ) )
-                return self::\$staticMethods[\$name][\$args];
+            if( isset( self::\$staticMethods[\$name][\$args] ) ){
+                \$ret = &self::\$staticMethods[\$name][\$args];
+                if( !isset(\$ret['count']) )
+                    \$ret['count'] = 0;
+                    
+                \$count = \$ret['count']++;
+                \$retLength = sizeof(\$ret['returns']);
+                
+                if( \$count >= \$retLength )
+                    \$count = \$retLength - 1;
+                    
+                return \$ret['returns'][ \$count ];
+            }                
         }
         throw new Exception("Call to undefined static method ". __CLASS__ ."::\$name()");
     }
@@ -85,13 +99,13 @@ EOF
     
     public function method( $name ){
         $this->lastMethod = $name;
-        $this->lastStaticMethod = null;
+        $this->lastStaticMethod = $this->lastArgs = null;   //reset
         return $this;
     }
     
     public function staticMethod( $name ){
         $this->lastStaticMethod = $name;
-        $this->lastMethod = null;
+        $this->lastMethod = $this->lastArgs = null;   //reset   
         return $this;
     }
     
@@ -104,22 +118,53 @@ EOF
         return $this;
     }
     
-    public function returns( $returnVal ){
+    public function returns( $returnVal = null, $position = null, $execFunc = null){
         if( isset($this->lastMethod) || isset($this->lastStaticMethod) ){    
             if( $this->lastArgs===null ){
                 $this->lastArgs = var_export(array(), true);
             }
             
-            if(isset($this->lastMethod))
-                $this->methods[$this->lastMethod][$this->lastArgs] = $returnVal;
+            if(isset($this->lastMethod)){
+            
+                if(empty($this->methods[$this->lastMethod][$this->lastArgs])){
+                    $this->methods[$this->lastMethod][$this->lastArgs] = array();
+                    $this->methods[$this->lastMethod][$this->lastArgs]['returns'] = array();
+                }
+                
+                $ret = &$this->methods[$this->lastMethod][$this->lastArgs]['returns'];
+                self::getReturnVal($ret, $returnVal, $position);
+            }
             else{
-                //self::$staticMethods[$this->lastStaticMethod][$this->lastArgs] = $returnVal;
                 return $returnVal;
             }
         }
         
-        //$this->lastMethod = $this->lastStaticMethod = $this->lastArgs = null;
         return $this;
+    }
+    
+    protected static function getReturnVal(&$ret, $returnVal, $position){                
+        if( is_int($position) ){
+            $retLength = sizeof($ret);
+            
+            if( $retLength==0 ){
+                $ret[] = $returnVal;
+                $retLength++;
+            }
+            
+            $prevVal = $ret[ $retLength-1 ];
+            $position = $position - 1 - $retLength;
+            
+            if( $position > 0 ){
+                $fill = array_fill($retLength, $position, $prevVal);
+                $ret = array_merge($ret, $fill);
+                //echo "$retLength, $position, $prevVal";
+                //var_dump( $fill );
+            }
+            $ret[] = $returnVal;
+        }
+        else{
+            $ret[] = $returnVal;
+        }    
     }
         
     public function __toString() {
@@ -130,8 +175,20 @@ EOF
     public function __call($name, $args) {
         if( isset( $this->methods[$name] ) ){
             $args = var_export($args, true);
-            if( isset( $this->methods[$name][$args] ) )
-                return $this->methods[$name][$args];
+            if( isset( $this->methods[$name][$args] ) ){
+                $ret = &$this->methods[$name][$args];
+                
+                if( !isset($ret['count']) )
+                    $ret['count'] = 0;
+
+                $count = $ret['count']++;
+                $retLength = sizeof($ret['returns']);
+                
+                if( $count >= $retLength )
+                    $count = $retLength - 1;
+                    
+                return $ret['returns'][ $count ];
+            }
         }
         
         throw new Exception("Call to undefined method ". $this->selfClassName ."::$name()");
