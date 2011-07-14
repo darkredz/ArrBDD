@@ -35,18 +35,30 @@ class ArrMock {
     /**
      * This must be the first call to create the Mock Object
      */
-    public static function create( $className = 'AnonClass', $suffix = 'Mock' ){
+    public static function create( $className = 'AnonClass', $staticAttr = null ){
         if(empty($className) || !is_string($className)){
             throw new Exception('Class name of the mock object is required');
         }
         
         $className .= 'Mock';
         
+        $staticAttrStr = '';
+        if(is_array($staticAttr)){
+            foreach( $staticAttr as $attr ){
+                $staticAttrStr .= 'public static $' . $attr .';';
+            }
+        }
+        
         eval(<<<EOF
 class $className extends ArrMock{
     public static \$staticMethods = array();
     protected \$selfClassName = '$className';
-
+    $staticAttrStr
+    
+    public function staticAttr(\$attr, \$val){
+        self::\$\$attr = \$val;
+    }
+    
     public function returns( \$returnVal = null, \$position = null, \$execFunc = null ){
         \$return = parent::returns( \$returnVal, \$position, \$execFunc );
         
