@@ -27,7 +27,7 @@ class ArrBDD{
         assert_options(ASSERT_WARNING, 0);     
     }
     
-    protected function onAssertFail($file, $line, $expr) {        
+    public function onAssertFail($file, $line, $expr) {        
         if( empty($expr) )
             $this->assertError = "Assertion failed in $file on line $line";
         else
@@ -185,7 +185,10 @@ class ArrBDD{
             foreach( $rs as &$rsvalue){
                 if($rsvalue===true) continue;
                 if($rsvalue===false)
-                    $rsvalue = $this->assertError[$i++];
+                    $rsvalue = $this->assertError[$i];
+                else
+                    $rsvalue = $this->assertError[$i] . ': '. $rsvalue;                
+                $i++;
             }
             $rst = $rs;                                        
         }
