@@ -27,7 +27,7 @@ class ArrBDD{
         assert_options(ASSERT_WARNING, 0);     
     }
     
-    protected function onAssertFail($file, $line, $expr) {        
+    public function onAssertFail($file, $line, $expr) {        
         if( empty($expr) )
             $this->assertError = "Assertion failed in $file on line $line";
         else
