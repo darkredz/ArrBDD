@@ -4,6 +4,9 @@ ARGH!! Mocks?!
 ===A simple BDD library for PHP 5===
 Use array & closures. Make it simple.
 
+''Arr!'' - This one is often confused with Arrrgh, which is of course the sound you make when you sit on a belaying pin. ''"Arrr!"'' can mean, variously, ''"yes,"'' ''"I agree,"'' ''"I'm happy,"'' ''"I'm enjoying this beer,"'' ''"My team is going to win it all,"''... It's the ''Pirate lingo'', rich and complicated, sort of like a good stew. 
+
+How'd this fit into da PHP world? Well, of coz' it does! C'mon, lad, it's '''P'''irates '''H'''elping '''P'''irates! Aye aye!
 ----
 
 ===Argh!? But just how?===
