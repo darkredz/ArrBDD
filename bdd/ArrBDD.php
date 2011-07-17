@@ -185,7 +185,10 @@ class ArrBDD{
             foreach( $rs as &$rsvalue){
                 if($rsvalue===true) continue;
                 if($rsvalue===false)
-                    $rsvalue = $this->assertError[$i++];
+                    $rsvalue = $this->assertError[$i];
+                else
+                    $rsvalue = $this->assertError[$i] . ': '. $rsvalue;                
+                $i++;
             }
             $rst = $rs;                                        
         }
