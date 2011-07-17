@@ -42,8 +42,13 @@ Arr! Mock:
     $mydbMock->staticMethod('getPath')
              ->returns('/var/db/');
 
+===YEah! Getting results===
+             
 Run the test and get some JSON results:
 [https://chrome.google.com/webstore/detail/mfjgkleajnieiaonjglfmanlmibchpam JSONView for Chrome]
 [https://chrome.google.com/webstore/detail/mfjgkleajnieiaonjglfmanlmibchpam JSONView for Firefox]
 
 [[File:https://lh5.googleusercontent.com/-TCdWD0mgw0Q/ThrYmAq69RI/AAAAAAAAAKM/NjnNmBvmnzs/json.jpg|BDD results]]
+
+Or use [http://code.google.com/p/arr-bdd/#gadget0 bArr] - a sophisticated BDD result viewer tool.
+[[File:https://lh3.googleusercontent.com/-jxCY_mj-Ttg/TiKTEwn9xKI/AAAAAAAAALE/1eKRlh-f4nQ/barrscreen.jpg|bArr, BDD result viewer]]
