@@ -273,7 +273,7 @@ EOF
                 if($argsKey==='handlerCallCount') continue;
                 
                 if($argsKey==='handler'){
-                    if($emptyArgs)
+                    if($emptyArgs && isset($methodsCalled['handlerCallCount']))
                         $total += $methodsCalled['handlerCallCount'];
                 }
                 else if(isset($mc['count'])){
