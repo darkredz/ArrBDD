@@ -15,7 +15,7 @@
  * @author Leng Sheng Hong <darkredz@gmail.com>
  * @since 1.0
  */
-
+ 
 class ArrBDD{
 
     protected $assertErrorKey;
@@ -69,7 +69,11 @@ class ArrBDD{
             
             // include subject to the result
             if( $includeSubject ){
-                $results['subject'] = $subject;
+                ob_start();
+                var_dump($subject);
+                $content = ob_get_contents();
+                ob_end_clean();
+                $results['subject'] = $content;
             }
             
             foreach( $spec as $stepName => $step ){
@@ -100,7 +104,11 @@ class ArrBDD{
                     
                     // include subject to the result
                     if( $includeSubject ){
-                        $results[$stepName]['subject'] = $_subject;
+                        ob_start();
+                        var_dump($_subject);
+                        $_content = ob_get_contents();
+                        ob_end_clean();                    
+                        $results[$stepName]['subject'] = $_content;
                     }                
                     
                     foreach( $step as $_stepName => $_step ){                
