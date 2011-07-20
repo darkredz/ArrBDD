@@ -6,25 +6,46 @@
  * @link http://www.doophp.com/arr-bdd
  * @copyright Copyright &copy; 2011 Leng Sheng Hong
  * @license http://www.doophp.com/license
- * @since 1.0
+ * @since 0.1
  */
 
 /**
  * ArrBDD - a simple BDD library utilizing PHP associative arrays and closures
  *
  * @author Leng Sheng Hong <darkredz@gmail.com>
- * @since 1.0
+ * @since 0.1
  */
-
+ 
 class ArrBDD{
 
     protected $assertErrorKey;
     protected $assertError;
     protected $assertFailMsg = array();
     
-    public function __construct(){
+    const SUBJECT_VAR_DUMP = 'var_dump';
+    const SUBJECT_PRINT_R = 'print_r';
+    const SUBJECT_VAR_EXPORT = 'var_export';
+    
+    public $subjectView;
+    
+    public function __construct($subjectView = ArrBDD::SUBJECT_VAR_DUMP){
         assert_options(ASSERT_CALLBACK, array(&$this, 'onAssertFail'));
         assert_options(ASSERT_WARNING, 0);     
+        $this->subjectView = $subjectView;
+    }
+    
+    protected function exportSubject($subject){
+        switch($this->subjectView){
+            case ArrBDD::SUBJECT_VAR_DUMP:
+                var_dump($subject);
+                break;
+            case ArrBDD::SUBJECT_PRINT_R:
+                print_r($subject);
+                break;
+            case ArrBDD::SUBJECT_VAR_EXPORT:
+                var_export($subject, true);
+                break;
+        }
     }
     
     public function onAssertFail($file, $line, $expr) {        
@@ -69,7 +90,11 @@ class ArrBDD{
             
             // include subject to the result
             if( $includeSubject ){
-                $results['subject'] = $subject;
+                ob_start();
+                $this->exportSubject($subject);
+                $content = ob_get_contents();
+                ob_end_clean();
+                $results['subject'] = $content;
             }
             
             foreach( $spec as $stepName => $step ){
@@ -100,7 +125,11 @@ class ArrBDD{
                     
                     // include subject to the result
                     if( $includeSubject ){
-                        $results[$stepName]['subject'] = $_subject;
+                        ob_start();
+                        $this->exportSubject($_subject);
+                        $_content = ob_get_contents();
+                        ob_end_clean();                    
+                        $results[$stepName]['subject'] = $_content;
                     }                
                     
                     foreach( $step as $_stepName => $_step ){                
@@ -135,7 +164,7 @@ class ArrBDD{
                 $rs = false;        // failed
             }
             // Single assertion, if fail, and no debug msg specify, use default assertion error msg
-            else if( empty($rs[1]) ){
+            else if( empty($rs[1]) && empty($rs[0][1]) ){
                 $rs = false;        
             }
             
@@ -149,10 +178,12 @@ class ArrBDD{
                 foreach( $asserts as $assert ){
                     # var_dump($assert);
                     if( $assert[0]!==true ){
-                        if( !empty($assert[1]) )
-                            $rs[] = $assert[1];
-                        else
+                        if( !empty($assert[1]) ){
+                            $rs[] = $assert[1];                            
+                        }
+                        else{
                             $rs[] = false;//$this->assertError[0];
+                        }
                     }
                     else{
                         $rs[] = true;
@@ -177,7 +208,7 @@ class ArrBDD{
         
         if( empty($afMsg) ){
             if($this->assertError===null) $this->assertError = false;
-            $rst = ($rs) ? $rs : $this->assertError;                
+            $rst = ($rs) ? $rs : $this->assertError;  
         }
         else if(!empty($rs)){
             $this->assertError = $afMsg;
@@ -193,11 +224,22 @@ class ArrBDD{
             $rst = $rs;                                        
         }
         else{
-            if(is_array($this->assertError) && sizeof($this->assertError)===1)    
+            if(is_array($this->assertError) && sizeof($this->assertError)===1){
                 $rst = $this->assertError[0];                
-            else
+                if(isset($afMsg[0]) && strpos($rst, 'Assertion failed in ')!==0){
+                    $rst = $afMsg[0] . ': ' . $rst;
+                }
+            }
+            else{              
                 $rst = $this->assertError;
+            }
         }    
+        
+        //errors will always be an array.
+        if($rst!==true && !is_array($rst)){
+            $rst = array($rst);
+        }
+        //var_dump($rst);
         $this->assertError = null;
     }
 
