@@ -6,14 +6,14 @@
  * @link http://www.doophp.com/arr-mock
  * @copyright Copyright &copy; 2011 Leng Sheng Hong
  * @license http://www.doophp.com/license
- * @since 1.0
+ * @since 0.1
  */
 
 /**
  * ArrMock - a simple tool for mocking objects
  *
  * @author Leng Sheng Hong <darkredz@gmail.com>
- * @since 1.0
+ * @since 0.1
  */
 class ArrMock {
     public $methods = array();    
